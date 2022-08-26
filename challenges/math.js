@@ -1,6 +1,6 @@
 exports.info = {
-    name: "math",
-    description: "Provides a math equation to be solved",
+    name: "Math",
+    description: "Provides a random set of math expressions that must be solved. The answer to the problem is the sum of the answer of all expressions combined.",
     timeout: 15
 };
 
@@ -46,11 +46,10 @@ function generateProblem() {
     return problem;
 };
 
-exports.generate = function(){
-    let response = {
+exports.generate = () => {
+    let problemData = {
         instructions: "Provide the sum of all listed expressions combined, as a single integer (round your result).",
-        media: "",
-        answer: null
+        media: ""
     };
 
     let numProblems = randomInt(2, 4);
@@ -63,8 +62,8 @@ exports.generate = function(){
         answer += eval(thisProblem);
     };
 
-    response.answer = Math.round(answer);
-    response.media = problems.join('\n');
+    answer = Math.round(answer);
+    problemData.media = problems.join('\n');
     
-    return response;
+    return [problemData, answer];
 };
