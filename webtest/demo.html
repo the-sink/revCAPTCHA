@@ -1,0 +1,197 @@
+<script src="https://unpkg.com/@popperjs/core@2"></script>
+<script src="https://kit.fontawesome.com/5e6e5b41b9.js" crossorigin="anonymous"></script>
+
+<style>
+    #revcaptchaButton {
+        background-color: #333;
+        padding: 1em;
+        color: white;
+        border-color: #666;
+        border-style: solid;
+        border-width: 1px;
+        border-radius: 3px;
+    }
+
+    #revcaptchaButton:hover {
+        background-color: #444;
+    }
+
+    #revcaptchaButton:focus {
+        background-color: #222;
+    }
+
+    #revcaptchaPopout {
+        background-color: #333;
+        color: white;
+        padding: 12px;
+        border-radius: 4px;
+        font-size: 13px;
+        display: none;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    #revcaptchaPopout[data-show] {
+        display: block;
+    }
+
+    #revcaptchaPopout[data-popper-placement^='top']>#arrow {
+        bottom: -4px;
+    }
+
+    #revcaptchaPopout[data-popper-placement^='bottom']>#arrow {
+        top: -4px;
+    }
+
+    #revcaptchaPopout[data-popper-placement^='left']>#arrow {
+        right: -4px;
+    }
+
+    #revcaptchaPopout[data-popper-placement^='right']>#arrow {
+        left: -4px;
+    }
+
+
+    #arrow,
+    #arrow::before {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background: inherit;
+    }
+
+    #arrow {
+        visibility: hidden;
+    }
+
+    #arrow::before {
+        visibility: visible;
+        content: '';
+        transform: rotate(45deg);
+    }
+</style>
+
+<form action="?">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name"><br>
+    <label for="email">Email:</label>
+    <input type="text" id="email" name="email"><br>
+    <div>
+        <input type="hidden" id="captchaInput" name="captcha"><br>
+        <button id="revcaptchaButton" type="button" style="margin-bottom:0.75em;"><i class="fa-solid fa-robot" style="padding-right:0.5em;"></i> I'm a robot<img src="loading.svg" id="loadChallengeIcon" alt="Loading" style="margin-left:0.5em;display:none;"><i class="fa-solid fa-circle-check" id="revDone" style="margin-left:0.5em;color:greenyellow;display:none;"></i></button>
+        <div id="revcaptchaPopout" role="tooltip">
+            <div id="arrow" data-popper-arrow></div>
+            <b><p id="revInstructions"><i class="fa-solid fa-circle-question" style="padding-right: 0.5em;"></i> Instructions here</p></b>
+            <div id="revMedia" style="margin-bottom: 0.5em;white-space: pre-line;">Media/problem here</div>
+            <input type="text" id="revAnswer"><br>
+            <button id="revSubmit" type="button" style="margin-top: 1em;">Verify</button><img src="loading.svg" id="submitLoadIcon" alt="Loading" style="margin-left:0.5em;display:none;">
+        </div>
+        <input type="hidden" id="captcha" name="captcha"><br>
+    </div>
+    <input type="submit" value="Submit">
+</form>
+
+<script>
+    const Http = new XMLHttpRequest();
+    const inputElement = document.querySelector('#captchaInput');
+    const button = document.querySelector('#revcaptchaButton');
+    const popout = document.querySelector('#revcaptchaPopout');
+    const loadIcon = document.querySelector('#loadChallengeIcon');
+    const submitLoadIcon = document.querySelector('#submitLoadIcon');
+    const doneCheckMark = document.querySelector('#revDone');
+
+    const instructionsText = document.querySelector('#revInstructions');
+    const media = document.querySelector('#revMedia');
+    const answer = document.querySelector('#revAnswer');
+    const submitChallenge = document.querySelector('#revSubmit');
+
+    let popperInstance = Popper.createPopper(button, popout, {
+        placement: 'right',
+        modifiers: [
+            {
+                name: 'offset',
+                options: {
+                    offset: [0, 8]
+                }
+            }
+        ]
+    });
+
+    let buttonFocused = false;
+    let mouseOverPopout = false;
+    let isVisible = false;
+    let mode = 'challenge';
+    let key = '';
+
+    function updateVisibility() {
+        nowVisible = (button.disabled && false) || (buttonFocused || mouseOverPopout);
+        if (isVisible === nowVisible) {return;}
+
+        isVisible = nowVisible;
+
+        if (isVisible) {
+            loadIcon.style.display = 'inline';
+            mode = 'challenge';
+            Http.open("GET", "http://localhost:3000/new-challenge");
+            Http.send();
+        } else {
+            popout.removeAttribute('data-show');
+        };
+    };
+
+    Http.responseType = 'json';
+    Http.onload = function() {
+        let response = Http.response;
+        console.log(response);
+
+        if (mode == 'challenge') {
+            popout.setAttribute('data-show', '');
+            popperInstance.update();
+            loadIcon.style.display = 'none';
+
+            revAnswer.value = "";
+            instructionsText.childNodes[1].textContent = response.instructions;
+            media.textContent = response.media;
+            key = response.key;
+        } else if (mode == 'verify') {
+            popout.removeAttribute('data-show');
+            console.log(response.success);
+            if (response.success === true) {
+                button.disabled = true;
+                inputElement.value = response.key;
+                doneCheckMark.style.display = 'inline';
+            };
+        };
+    };
+
+    function onButtonFocus() {
+        buttonFocused = true;
+        updateVisibility();
+    };
+
+    function onButtonUnfocus() {
+        buttonFocused = false;
+        updateVisibility();
+    };
+
+    function onMouseEnter() {
+        mouseOverPopout = true;
+        updateVisibility();
+    };
+
+    function onMouseLeave() {
+        mouseOverPopout = false;
+    };
+
+    submitChallenge.addEventListener('click', function(){
+        mode = 'verify';
+        Http.open("POST", "http://localhost:3000/verify");
+        Http.setRequestHeader("Content-Type", "application/json");
+        Http.send(JSON.stringify({"key": key, "answer": answer.value}));
+    });
+
+    button.addEventListener('focusin', onButtonFocus);
+    button.addEventListener('focusout', onButtonUnfocus);
+    popout.addEventListener('mouseenter', onMouseEnter);
+    popout.addEventListener('mouseleave', onMouseLeave);
+    document.body.addEventListener('click', updateVisibility);
+</script>
