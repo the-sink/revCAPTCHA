@@ -33,6 +33,7 @@ let challenges = [];
 
 glob.sync('./challenges/*.js').forEach((file) => {
   challenges.push(require(path.resolve(file)));
+  console.log("Loaded challenge " + path.basename(file));
 });
 
 db.connect();

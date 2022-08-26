@@ -1,0 +1,16 @@
+exports.info = {
+    name: "testchallenge",
+    description: "A challenge used for testing.",
+    instructions: "Write \"yes\" in the answer field.",
+    timeout: 15
+};
+
+exports.generate = () => {
+    let problemData = {
+        media: "Literally just write \"yes\"."
+    };
+    let answer = "yes";
+
+    return [problemData, answer];
+};
+
