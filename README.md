@@ -10,3 +10,4 @@ CAPTCHA ideas:
 - hexcolors: Generate a 32x32 pixel image with anywhere between 15 and 30 random colors, make user provide all of the unique hex color codes present in the image within 20 seconds
 - frequencies: Generate a 2 second lossless audio clip with a new random frequency every 100ms. Make user average all frequencies and provide the rounded result within 20 seconds
 - dtmf: Generate the DTMF tones for a random 12 digit number as an audio file, have the user provide this number within 10 seconds
+- something regarding cryptographic keys or string hashes

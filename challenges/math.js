@@ -1,7 +1,7 @@
 exports.info = {
     name: "math",
     description: "Provides a math equation to be solved",
-    timeout: 10
+    timeout: 15
 };
 
 const operators = ["+", "-", "*", "/"];
