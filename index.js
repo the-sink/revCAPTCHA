@@ -2,6 +2,7 @@ const glob = require('glob');
 const path = require('path');
 const crypto = require('crypto');
 const express = require('express');
+const cors = require('cors')
 const redis = require('redis');
 const rateLimit = require('express-rate-limit')
 
@@ -22,6 +23,7 @@ const limiter = rateLimit.rateLimit({
 
 app.use(limiter);
 app.use(express.json());
+app.use(cors());
 
 const db = redis.createClient();
 

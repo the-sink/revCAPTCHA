@@ -7,6 +7,8 @@ exports.info = {
 const operators = ["+", "-", "*", "/"];
 const minExpressions = 2;
 const maxExpressions = 12;
+const minProblems = 2;
+const maxProblems = 4;
 
 function createExpression(first, operator, second) {
     return `(${first} ${operator} ${second})`;
@@ -52,7 +54,7 @@ exports.generate = () => {
         media: ""
     };
 
-    let numProblems = randomInt(2, 4);
+    let numProblems = randomInt(minProblems, maxProblems);
     let problems = [];
     let answer = 0;
 
