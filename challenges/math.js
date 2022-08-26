@@ -6,9 +6,9 @@ exports.info = {
 
 const operators = ["+", "-", "*", "/"];
 const minExpressions = 2;
-const maxExpressions = 12;
-const minProblems = 2;
-const maxProblems = 4;
+const maxExpressions = 9;
+const minProblems = 3;
+const maxProblems = 5;
 
 function createExpression(first, operator, second) {
     return `(${first} ${operator} ${second})`;
